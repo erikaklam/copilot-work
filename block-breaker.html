@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Block Breaker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
+  <style>
+    body{font-family:Georgia,serif}
+    .navy{background:#3112ff}
+    .coral{background:#f35c44}
+    .yellow{background:#ffd500}
+    .blue{background:#56bdf5}
+    .pink{background:#f15bb5}
+    .green{background:#9be88d}
+    .panel{min-height:32rem}
+    .game-canvas{background:#071c2b;display:block;margin:0 auto;border-radius:6px}
+    .controls{margin-top:1rem}
+  </style>
+</head>
+<body class="bg-white">
+  <nav class="navbar navbar-expand-lg navbar-dark navy py-3">
+    <div class="container-fluid justify-content-center">
+      <a class="navbar-brand fw-bold fs-3" href="index.html">Link</a>
+      <button class="navbar-toggler position-absolute end-0 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navLinks">
+        <ul class="navbar-nav gap-lg-3 text-center">
+          <li class="nav-item"><a class="nav-link fw-semibold" href="https://youtube.com" target="_blank" rel="noopener"><i class="lni lni-youtube me-1"></i>YouTube</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="https://linkedin.com" target="_blank" rel="noopener"><i class="lni lni-linkedin-original me-1"></i>LinkedIn</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="hangman.html"><i class="lni lni-game-alt me-1"></i>Hangman</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="coral text-center py-3 fw-bold fs-2">Block Breaker</header>
+
+  <main class="container-fluid px-0">
+    <div class="row g-0">
+      <aside class="col-12 col-md-2 yellow d-flex align-items-start justify-content-center p-4 panel order-1 order-md-1">
+        <div class="fw-bold fs-2"><i class="lni lni-star-filled me-2"></i>Aside 1</div>
+      </aside>
+
+      <section class="col-12 col-md-8 blue d-flex align-items-center p-4 panel order-3 order-md-2">
+        <div class="w-100 text-center">
+          <canvas id="gameCanvas" width="640" height="400" class="game-canvas"></canvas>
+          <div class="controls d-flex justify-content-center gap-3">
+            <button id="startBtn" class="btn btn-primary">Start</button>
+            <button id="pauseBtn" class="btn btn-outline-secondary">Pause</button>
+            <button id="resetBtn" class="btn btn-danger">Reset</button>
+            <div class="ms-3 align-self-center">Score: <span id="score">0</span></div>
+            <div class="ms-3 align-self-center">Lives: <span id="lives">3</span></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="col-12 col-md-2 pink d-flex align-items-start justify-content-center p-4 panel order-2 order-md-3">
+        <div class="fw-bold fs-2"><i class="lni lni-heart-filled me-2"></i>Aside 2</div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="green text-center py-3 fw-bold fs-2">Footer</footer>
+
+  <script>
+    // Minimal block breaker (Breakout) implementation
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives');
+
+    let animationId;
+    let running = false;
+    let ballRadius = 8;
+    let x = canvas.width/2;
+    let y = canvas.height-30;
+    let dx = 3;
+    let dy = -3;
+    const paddleHeight = 12;
+    const paddleWidth = 100;
+    let paddleX = (canvas.width-paddleWidth)/2;
+    let rightPressed = false;
+    let leftPressed = false;
+
+    // bricks
+    const brickRowCount = 5;
+    const brickColumnCount = 7;
+    const brickWidth = 70;
+    const brickHeight = 18;
+    const brickPadding = 10;
+    const brickOffsetTop = 30;
+    const brickOffsetLeft = 35;
+    let bricks = [];
+    let score = 0;
+    let lives = 3;
+
+    function initBricks(){
+      bricks = [];
+      for(let c=0;c<brickColumnCount;c++){
+        bricks[c]=[];
+        for(let r=0;r<brickRowCount;r++){
+          bricks[c][r]={ x:0, y:0, status:1 };
+        }
+      }
+    }
+
+    function drawBricks(){
+      for(let c=0;c<brickColumnCount;c++){
+        for(let r=0;r<brickRowCount;r++){
+          if(bricks[c][r].status==1){
+            const brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+            const brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+            bricks[c][r].x = brickX;
+            bricks[c][r].y = brickY;
+            ctx.fillStyle = '#ffcc66';
+            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+            ctx.strokeStyle = '#ffffff';
+            ctx.strokeRect(brickX, brickY, brickWidth, brickHeight);
+          }
+        }
+      }
+    }
+
+    function drawBall(){
+      ctx.beginPath();
+      ctx.arc(x,y,ballRadius,0,Math.PI*2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawPaddle(){
+      ctx.beginPath();
+      ctx.rect(paddleX, canvas.height-paddleHeight-10, paddleWidth, paddleHeight);
+      ctx.fillStyle = '#003366';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawBricks();
+      drawBall();
+      drawPaddle();
+      collisionDetection();
+
+      if(x + dx > canvas.width-ballRadius || x + dx < ballRadius){
+        dx = -dx;
+      }
+      if(y + dy < ballRadius){
+        dy = -dy;
+      } else if(y + dy > canvas.height-ballRadius-10){
+        if(x > paddleX && x < paddleX + paddleWidth){
+          dy = -dy;
+        } else {
+          lives--;
+          livesEl.textContent = lives;
+          if(!lives){
+            alert('GAME OVER');
+            resetGame();
+            return;
+          } else {
+            x = canvas.width/2;
+            y = canvas.height-30;
+            dx = 3;
+            dy = -3;
+            paddleX = (canvas.width-paddleWidth)/2;
+          }
+        }
+      }
+
+      if(rightPressed && paddleX < canvas.width - paddleWidth){
+        paddleX += 7;
+      } else if(leftPressed && paddleX > 0){
+        paddleX -= 7;
+      }
+
+      x += dx;
+      y += dy;
+
+      animationId = requestAnimationFrame(draw);
+    }
+
+    function collisionDetection(){
+      for(let c=0;c<brickColumnCount;c++){
+        for(let r=0;r<brickRowCount;r++){
+          const b = bricks[c][r];
+          if(b.status==1){
+            if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight){
+              dy = -dy;
+              b.status = 0;
+              score++;
+              scoreEl.textContent = score;
+              if(score == brickRowCount*brickColumnCount){
+                alert('YOU WIN, CONGRATS!');
+                resetGame();
+              }
+            }
+          }
+        }
+      }
+    }
+
+    document.addEventListener('keydown',(e)=>{
+      if(e.key == 'Right' || e.key == 'ArrowRight'){ rightPressed = true; }
+      else if(e.key == 'Left' || e.key == 'ArrowLeft'){ leftPressed = true; }
+    });
+    document.addEventListener('keyup',(e)=>{
+      if(e.key == 'Right' || e.key == 'ArrowRight'){ rightPressed = false; }
+      else if(e.key == 'Left' || e.key == 'ArrowLeft'){ leftPressed = false; }
+    });
+    canvas.addEventListener('mousemove',(e)=>{
+      const relativeX = e.clientX - canvas.getBoundingClientRect().left;
+      if(relativeX > 0 && relativeX < canvas.width){
+        paddleX = relativeX - paddleWidth/2;
+      }
+    });
+
+    function startGame(){
+      if(running) return;
+      running = true;
+      cancelAnimationFrame(animationId);
+      animationId = requestAnimationFrame(draw);
+    }
+    function pauseGame(){
+      running = false;
+      cancelAnimationFrame(animationId);
+    }
+    function resetGame(){
+      pauseGame();
+      initBricks();
+      x = canvas.width/2; y = canvas.height-30; dx = 3; dy = -3;
+      paddleX = (canvas.width-paddleWidth)/2;
+      score = 0; lives = 3;
+      scoreEl.textContent = score; livesEl.textContent = lives;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+
+    startBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', ()=>{ if(running) pauseGame(); else startGame(); });
+    resetBtn.addEventListener('click', resetGame);
+
+    // init
+    initBricks(); resetGame();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
