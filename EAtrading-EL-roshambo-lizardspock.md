@@ -24,26 +24,21 @@ Which one will it be?
 <script>
 games = JSON.parse(localStorage.getItem('games')) || [];
 playRoshambo = function(clientGesture){
-    // Randomize computer choice from all 5 options
-    const choices = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
-    const serverGesture = choices[Math.floor(Math.random() * choices.length)];
+    // Server always picks scissors
+    serverGesture = 'scissors';
     
-    // Rock Paper Scissors Lizard Spock rules
-    const wins = {
-        rock: ['scissors', 'lizard'],
-        paper: ['rock', 'spock'],
-        scissors: ['paper', 'lizard'],
-        lizard: ['paper', 'spock'],
-        spock: ['rock', 'scissors']
-    };
-    
+    // Determine result when server picks scissors
     let result;
-    if (clientGesture === serverGesture) {
-        result = "tie";
-    } else if (wins[clientGesture].includes(serverGesture)) {
-        result = "win";
-    } else {
-        result = "lose";
+    if (clientGesture == 'rock') {
+        result = "win";  // rock beats scissors
+    } else if (clientGesture == 'paper') {
+        result = "lose";  // paper loses to scissors
+    } else if (clientGesture == 'scissors') {
+        result = "tie";  // scissors ties scissors
+    } else if (clientGesture == 'lizard') {
+        result = "lose";  // lizard loses to scissors
+    } else if (clientGesture == 'spock') {
+        result = "win";  // spock beats scissors
     }
 
     showHistory();

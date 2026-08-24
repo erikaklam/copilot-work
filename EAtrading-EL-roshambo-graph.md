@@ -28,24 +28,17 @@ games = JSON.parse(localStorage.getItem('games')) || [];
 let resultsChart = null;
 
 playRoshambo = function(clientGesture){
-    // Randomize computer choice
-    const choices = ['rock', 'paper', 'scissors'];
-    const serverGesture = choices[Math.floor(Math.random() * choices.length)];
-    
-    // Determine winner
-    let result;
-    if (clientGesture === serverGesture) {
-        result = "tie";
-    } else if (
-        (clientGesture === 'rock' && serverGesture === 'scissors') ||
-        (clientGesture === 'paper' && serverGesture === 'rock') ||
-        (clientGesture === 'scissors' && serverGesture === 'paper')
-    ) {
+    if (clientGesture=='rock') {
         result = "win";
-    } else {
+    }
+    if (clientGesture=='paper') {
         result = "lose";
     }
+    if (clientGesture=='scissors') {
+        result = "tie";
+    }
 
+    serverGesture = 'scissors';
     showHistory();
     document.getElementById('results').innerHTML = result;
     saveGame(clientGesture, serverGesture, result);
