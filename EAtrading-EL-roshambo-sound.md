@@ -35,7 +35,29 @@ playRoshambo = function(clientGesture){
     serverGesture = 'scissors';
     showHistory();
     document.getElementById('results').innerHTML = result;
+    if (result === "lose") {
+        playLoseSound();
+    }
     saveGame(clientGesture, serverGesture, result);
+}
+
+// Synthesizes a "sad trombone" wah-wah using the Web Audio API, no external file needed
+playLoseSound = function() {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [392.00, 369.99, 349.23, 311.13]; // G4, F#4, F4, D#4 descending "wah-wah-wah-wah"
+    notes.forEach((freq, i) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.value = freq;
+        const startTime = audioContext.currentTime + i * 0.3;
+        gainNode.gain.setValueAtTime(0.2, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.3);
+    });
 }
 
 deleteGame = function(time) {
