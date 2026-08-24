@@ -1,3 +1,12 @@
+---
+layout: index
+title: "Rock Paper Scissors: Expert Mode"
+heading: "Rock Paper Roshambo in JavaScript"
+subheading: "Game History"
+description: "Roshambo on Expert Mode"
+user-story: "As a player, I want to play Roshambo against the computer and view my game history so that I can see the results of my previous games."
+---
+
 Which one will it be?
 
 <a href="#" onclick="playRoshambo('rock')">rock</a>
@@ -11,7 +20,7 @@ Which one will it be?
 
 
 <script>
-    games = JSON.parse(localStorage.getItem('games')) || [];
+games = JSON.parse(localStorage.getItem('games')) || [];
 playRoshambo = function(clientGesture){
     if (clientGesture=='rock') {
         result = "lose";
