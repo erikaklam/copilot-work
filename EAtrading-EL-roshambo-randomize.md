@@ -1,5 +1,5 @@
 ---
-layout: index
+layout: minimal-bootstrap
 title: "Rock Paper Scissors: Randomize Computer Choice"
 heading: "Rock Paper Roshambo in JavaScript"
 subheading: "Competitive Play"

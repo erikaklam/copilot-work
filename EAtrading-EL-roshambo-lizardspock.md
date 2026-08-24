@@ -1,5 +1,5 @@
 ---
-layout: index
+layout: minimal-bootstrap
 title: "Rock Paper Scissors: Lizard Spock"
 heading: "Rock Paper Roshambo in JavaScript"
 subheading: "Strategic Gameplay"

@@ -1,5 +1,5 @@
 ---
-layout: index
+layout: minimal-bootstrap
 title: "Rock Paper Scissors: Sound Effects"
 heading: "Rock Paper Roshambo in JavaScript"
 subheading: "Enhanced Gameplay"

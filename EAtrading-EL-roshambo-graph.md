@@ -1,5 +1,5 @@
 ---
-layout: index
+layout: minimal-bootstrap
 title: "Rock Paper Scissors: Historical Results Graph"
 heading: "Rock Paper Roshambo in JavaScript"
 subheading: "Data Analysis"
