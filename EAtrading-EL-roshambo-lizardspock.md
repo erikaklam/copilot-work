@@ -12,6 +12,8 @@ Which one will it be?
 <a href="#" onclick="playRoshambo('rock')">rock</a>
 <a href="#" onclick="playRoshambo('paper')">paper</a>
 <a href="#" onclick="playRoshambo('scissors')">scissors</a>
+<a href="#" onclick="playRoshambo('lizard')">lizard</a>
+<a href="#" onclick="playRoshambo('spock')">spock</a>
 
 <br/>
 
@@ -22,17 +24,28 @@ Which one will it be?
 <script>
 games = JSON.parse(localStorage.getItem('games')) || [];
 playRoshambo = function(clientGesture){
-    if (clientGesture=='rock') {
+    // Randomize computer choice from all 5 options
+    const choices = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
+    const serverGesture = choices[Math.floor(Math.random() * choices.length)];
+    
+    // Rock Paper Scissors Lizard Spock rules
+    const wins = {
+        rock: ['scissors', 'lizard'],
+        paper: ['rock', 'spock'],
+        scissors: ['paper', 'lizard'],
+        lizard: ['paper', 'spock'],
+        spock: ['rock', 'scissors']
+    };
+    
+    let result;
+    if (clientGesture === serverGesture) {
+        result = "tie";
+    } else if (wins[clientGesture].includes(serverGesture)) {
+        result = "win";
+    } else {
         result = "lose";
     }
-    if (clientGesture=='paper') {
-        result = "win";
-    }
-    if (clientGesture=='scissors') {
-        result = "tie";
-    }
 
-    serverGesture = 'scissors';
     showHistory();
     document.getElementById('results').innerHTML = result;
     saveGame(clientGesture, serverGesture, result);
